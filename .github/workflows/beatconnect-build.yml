@@ -1,0 +1,158 @@
+name: BeatConnect Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_data_url:
+        description: 'URL to fetch project data from BeatConnect'
+        required: true
+      callback_url:
+        description: 'URL to notify BeatConnect of build status'
+        required: true
+
+env:
+  PLUGIN_NAME: Drive
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch project data
+        run: |
+          curl -X GET "${{ github.event.inputs.project_data_url }}" `
+            -H "x-webhook-secret: ${{ secrets.BUILDS_WEBHOOK_SECRET }}" `
+            -o resources/project_data.json
+        shell: pwsh
+
+      - name: Check activation flag
+        id: flags
+        run: |
+          $flags = Get-Content resources/project_data.json | ConvertFrom-Json
+          $enableActivation = if ($flags.flags.enableActivationKeys) { "ON" } else { "OFF" }
+          echo "ENABLE_ACTIVATION=$enableActivation" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Web UI
+        run: |
+          cd web-ui
+          npm ci
+          npm run build
+        shell: pwsh
+
+      - name: Download JUCE
+        run: |
+          curl -L -o juce.zip https://github.com/juce-framework/JUCE/releases/download/8.0.0/juce-8.0.0-windows.zip
+          7z x juce.zip -oJUCE_temp
+          mv JUCE_temp/JUCE-8.0.0 JUCE
+        shell: pwsh
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G "Visual Studio 17 2022" -A x64 `
+            -DJUCE_PATH="${{ github.workspace }}/JUCE" `
+            -DBEATCONNECT_ENABLE_ACTIVATION=${{ steps.flags.outputs.ENABLE_ACTIVATION }}
+        shell: pwsh
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Package artifacts
+        run: |
+          mkdir -p artifacts/windows
+          cp -r "build/${env:PLUGIN_NAME}_artefacts/Release/VST3" artifacts/windows/
+        shell: pwsh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-vst3
+          path: artifacts/windows/
+
+      - name: Notify BeatConnect
+        if: always()
+        run: |
+          $status = if (${{ job.status }} -eq 'success') { 'success' } else { 'failed' }
+          curl -X POST "${{ github.event.inputs.callback_url }}" `
+            -H "Content-Type: application/json" `
+            -H "x-webhook-secret: ${{ secrets.BUILDS_WEBHOOK_SECRET }}" `
+            -d "{`"status`": `"$status`", `"platform`": `"windows`", `"run_id`": `"${{ github.run_id }}`"}"
+        shell: pwsh
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch project data
+        run: |
+          curl -X GET "${{ github.event.inputs.project_data_url }}" \
+            -H "x-webhook-secret: ${{ secrets.BUILDS_WEBHOOK_SECRET }}" \
+            -o resources/project_data.json
+
+      - name: Check activation flag
+        id: flags
+        run: |
+          ENABLE_ACTIVATION=$(jq -r '.flags.enableActivationKeys // false' resources/project_data.json)
+          if [ "$ENABLE_ACTIVATION" = "true" ]; then
+            echo "ENABLE_ACTIVATION=ON" >> $GITHUB_OUTPUT
+          else
+            echo "ENABLE_ACTIVATION=OFF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Web UI
+        run: |
+          cd web-ui
+          npm ci
+          npm run build
+
+      - name: Download JUCE
+        run: |
+          curl -L -o juce.zip https://github.com/juce-framework/JUCE/releases/download/8.0.0/juce-8.0.0-osx.zip
+          unzip juce.zip
+          mv JUCE-8.0.0 JUCE
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G Xcode \
+            -DJUCE_PATH="${{ github.workspace }}/JUCE" \
+            -DBEATCONNECT_ENABLE_ACTIVATION=${{ steps.flags.outputs.ENABLE_ACTIVATION }}
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Package artifacts
+        run: |
+          mkdir -p artifacts/macos
+          cp -r "build/${PLUGIN_NAME}_artefacts/Release/VST3" artifacts/macos/
+          cp -r "build/${PLUGIN_NAME}_artefacts/Release/AU" artifacts/macos/ || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-plugins
+          path: artifacts/macos/
+
+      - name: Notify BeatConnect
+        if: always()
+        run: |
+          STATUS=${{ job.status }}
+          curl -X POST "${{ github.event.inputs.callback_url }}" \
+            -H "Content-Type: application/json" \
+            -H "x-webhook-secret: ${{ secrets.BUILDS_WEBHOOK_SECRET }}" \
+            -d "{\"status\": \"$STATUS\", \"platform\": \"macos\", \"run_id\": \"${{ github.run_id }}\"}"

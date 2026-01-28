@@ -1,0 +1,39 @@
+# Build directories
+build/
+cmake-build-*/
+out/
+
+# IDE
+.vs/
+.vscode/
+*.xcodeproj/
+*.xcworkspace/
+.idea/
+*.swp
+*.swo
+
+# JUCE
+JUCE/
+Builds/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Built web assets (CI will build these)
+Resources/WebUI/*
+!Resources/WebUI/.gitkeep
+
+# Project data (injected by CI)
+resources/project_data.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local env files
+.env
+.env.local
