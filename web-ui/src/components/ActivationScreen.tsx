@@ -1,11 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { addCustomEventListener, emitEvent, isInJuceWebView } from '../lib/juce-bridge'
-
-// Dev mode: skip real activation when running in browser (not in JUCE WebView)
-const DEV_MODE = !isInJuceWebView()
-
-// Test codes that bypass real activation (case insensitive)
-const TEST_CODES = ['TEST', 'DEMO', 'BEATCONNECT', 'DEV']
+import { useState, useEffect, useCallback } from 'react'
+import { addCustomEventListener, emitEvent } from '../lib/juce-bridge'
 
 interface ActivationInfo {
   activationCode: string
@@ -36,8 +30,6 @@ export function ActivationScreen({ onActivated }: { onActivated: () => void }) {
   const [activationInfo, setActivationInfo] = useState<ActivationInfo | null>(null)
   const [showContent, setShowContent] = useState(false)
 
-  // Track if we're using a test code (ignore real API responses)
-  const usingTestCode = useRef(false)
 
   // Entrance animation
   useEffect(() => {
@@ -47,12 +39,6 @@ export function ActivationScreen({ onActivated }: { onActivated: () => void }) {
 
   // Check activation status on mount
   useEffect(() => {
-    // Dev mode: show input screen briefly
-    if (DEV_MODE) {
-      setTimeout(() => setScreenState('input'), 500)
-      return
-    }
-
     const unsubState = addCustomEventListener('activationState', (data: unknown) => {
       const state = data as ActivationState
 
@@ -71,9 +57,6 @@ export function ActivationScreen({ onActivated }: { onActivated: () => void }) {
     })
 
     const unsubResult = addCustomEventListener('activationResult', (data: unknown) => {
-      // Ignore API responses if we're using a test code
-      if (usingTestCode.current) return
-
       const result = data as ActivationResult
 
       switch (result.status) {
@@ -122,37 +105,10 @@ export function ActivationScreen({ onActivated }: { onActivated: () => void }) {
     const code = licenseKey.trim()
     if (!code) return
 
-    // Check for test codes FIRST (case insensitive, trim whitespace)
-    const isTestCode = TEST_CODES.some(tc =>
-      code.toUpperCase().replace(/[\s-]/g, '') === tc
-    )
-
-    if (DEV_MODE || isTestCode) {
-      usingTestCode.current = true
-      setScreenState('activating')
-      setErrorMessage('')
-
-      setTimeout(() => {
-        setActivationInfo({
-          activationCode: code,
-          machineId: 'dev-machine',
-          activatedAt: new Date().toISOString(),
-          currentActivations: 1,
-          maxActivations: 3,
-          isValid: true
-        })
-        setScreenState('success')
-        setTimeout(onActivated, 1500)
-      }, 800)
-      return
-    }
-
-    // Real activation
-    usingTestCode.current = false
     setScreenState('activating')
     setErrorMessage('')
     emitEvent('activateLicense', { code })
-  }, [licenseKey, onActivated])
+  }, [licenseKey])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -163,7 +119,6 @@ export function ActivationScreen({ onActivated }: { onActivated: () => void }) {
   const handleRetry = useCallback(() => {
     setScreenState('input')
     setErrorMessage('')
-    usingTestCode.current = false
   }, [])
 
   return (

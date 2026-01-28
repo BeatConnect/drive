@@ -6,6 +6,7 @@ import { AudioReactiveBackground } from './components/AudioReactiveBackground'
 import { ModeSelector } from './components/ModeSelector'
 import { SmallKnob } from './components/SmallKnob'
 import { ToggleSwitch } from './components/ToggleSwitch'
+import { PresetSelector } from './components/PresetSelector'
 import { ActivationScreen } from './components/ActivationScreen'
 import { AudioProvider } from './context/AudioContext'
 import { useToggleParam } from './hooks/useJuceParam'
@@ -63,6 +64,11 @@ function PluginUI() {
           <VerticalArcSlider paramId="mix" label="MIX" color="#ff6644" side="right" />
         </div>
       </main>
+
+      {/* Preset selector - top left */}
+      <div className="preset-container">
+        <PresetSelector />
+      </div>
 
       {/* Footer with controls */}
       <footer className="plugin-footer">
