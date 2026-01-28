@@ -15,6 +15,7 @@ public:
 
 private:
     void setupWebView();
+    void setupRelaysAndAttachments();
     void timerCallback() override;
     void sendVisualizerData();
 
@@ -27,12 +28,25 @@ private:
 
     DriveAudioProcessor& audioProcessor;
 
-    // JUCE 8 Relay system - MUST be created BEFORE WebBrowserComponent
-    juce::WebSliderRelay driveRelay { "drive" };
-    juce::WebSliderRelay pressureRelay { "pressure" };
-    juce::WebSliderRelay toneRelay { "tone" };
-    juce::WebSliderRelay mixRelay { "mix" };
-    juce::WebSliderRelay outputRelay { "output" };
+    // Resources directory for bundled WebUI
+    juce::File resourcesDir;
+
+    // JUCE 8 Relay system - created BEFORE WebBrowserComponent
+    // Slider relays for continuous parameters
+    std::unique_ptr<juce::WebSliderRelay> driveRelay;
+    std::unique_ptr<juce::WebSliderRelay> pressureRelay;
+    std::unique_ptr<juce::WebSliderRelay> toneRelay;
+    std::unique_ptr<juce::WebSliderRelay> mixRelay;
+    std::unique_ptr<juce::WebSliderRelay> outputRelay;
+    std::unique_ptr<juce::WebSliderRelay> attackRelay;
+    std::unique_ptr<juce::WebSliderRelay> sustainRelay;
+
+    // ComboBox relay for choice parameter
+    std::unique_ptr<juce::WebComboBoxRelay> modeRelay;
+
+    // Toggle relays for boolean parameters
+    std::unique_ptr<juce::WebToggleButtonRelay> autoGainRelay;
+    std::unique_ptr<juce::WebToggleButtonRelay> bypassRelay;
 
     // Parameter attachments - created AFTER WebBrowserComponent
     std::unique_ptr<juce::WebSliderParameterAttachment> driveAttachment;
@@ -40,6 +54,13 @@ private:
     std::unique_ptr<juce::WebSliderParameterAttachment> toneAttachment;
     std::unique_ptr<juce::WebSliderParameterAttachment> mixAttachment;
     std::unique_ptr<juce::WebSliderParameterAttachment> outputAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> attackAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> sustainAttachment;
+
+    std::unique_ptr<juce::WebComboBoxParameterAttachment> modeAttachment;
+
+    std::unique_ptr<juce::WebToggleButtonParameterAttachment> autoGainAttachment;
+    std::unique_ptr<juce::WebToggleButtonParameterAttachment> bypassAttachment;
 
     // WebView component
     std::unique_ptr<juce::WebBrowserComponent> webView;

@@ -1,13 +1,14 @@
 /* ========================================
-   DRIVE - Drum Analog Processor
+   DRIVE - Modern Industrial Design
    ======================================== */
 
 :root {
-  --primary: #ff6b35;
-  --secondary: #ff4444;
-  --accent: #44aaff;
-  --bg-dark: #0a0a0f;
-  --bg-mid: #151520;
+  --primary: #ff5522;
+  --primary-light: #ff7744;
+  --secondary: #ff3333;
+  --steel-light: #3a3a42;
+  --steel-mid: #2a2a32;
+  --steel-dark: #1a1a22;
   --text: #ffffff;
   --text-dim: #888899;
 }
@@ -20,83 +21,207 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg-dark);
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  background: #1a1a20;
   color: var(--text);
   overflow: hidden;
 }
 
 /* ========================================
-   Plugin Container
+   Container
    ======================================== */
 
 .plugin-container {
-  width: 600px;
+  width: 900px;
   height: 500px;
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  --mode-hue: 0deg;
 }
+
+/* Apply mode hue shift to all UI colored elements */
 
 /* ========================================
-   Background Effects
+   Background - Molten Metal / Heat
    ======================================== */
 
-.background-gradient {
+.bg-base {
   position: absolute;
   inset: 0;
+  /* Dark to lighter gradient with warm undertones */
+  background:
+    radial-gradient(ellipse 100% 80% at 50% 60%, #2a2028 0%, #1a1820 40%, #14141a 100%);
+}
+
+.bg-scene {
+  position: absolute;
+  inset: 0;
+  /* Abstract heat distortion / energy waves */
+  background:
+    /* Diagonal energy streaks */
+    linear-gradient(135deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 85, 34, 0.03) 42%,
+      rgba(255, 85, 34, 0.06) 44%,
+      rgba(255, 85, 34, 0.03) 46%,
+      transparent 48%,
+      transparent 100%
+    ),
+    linear-gradient(135deg,
+      transparent 0%,
+      transparent 60%,
+      rgba(255, 60, 30, 0.04) 62%,
+      rgba(255, 60, 30, 0.07) 64%,
+      rgba(255, 60, 30, 0.04) 66%,
+      transparent 68%,
+      transparent 100%
+    ),
+    linear-gradient(-135deg,
+      transparent 0%,
+      transparent 70%,
+      rgba(255, 100, 50, 0.03) 72%,
+      rgba(255, 100, 50, 0.05) 74%,
+      rgba(255, 100, 50, 0.03) 76%,
+      transparent 78%,
+      transparent 100%
+    ),
+    /* Subtle vertical gradient bands */
+    linear-gradient(90deg,
+      rgba(255, 70, 30, 0.02) 0%,
+      transparent 15%,
+      transparent 35%,
+      rgba(255, 85, 34, 0.03) 50%,
+      transparent 65%,
+      transparent 85%,
+      rgba(255, 70, 30, 0.02) 100%
+    );
+}
+
+.bg-grit {
+  position: absolute;
+  inset: 0;
+  /* Subtle texture */
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.bg-glow {
+  position: absolute;
+  inset: 0;
+  /* Central heat source - like looking at hot metal */
+  transition: opacity 0.05s ease, transform 0.08s ease, filter 0.1s ease;
+  transform-origin: center center;
+  background:
+    /* Core glow */
+    radial-gradient(ellipse 35% 40% at 50% 50%, rgba(255, 100, 50, 0.2) 0%, rgba(255, 70, 30, 0.1) 30%, transparent 60%),
+    /* Wider ambient heat */
+    radial-gradient(ellipse 60% 55% at 50% 50%, rgba(255, 85, 34, 0.1) 0%, transparent 50%),
+    /* Bottom heat reflection */
+    radial-gradient(ellipse 80% 30% at 50% 95%, rgba(255, 85, 34, 0.12) 0%, transparent 50%),
+    /* Top subtle light */
+    radial-gradient(ellipse 60% 20% at 50% 5%, rgba(255, 120, 80, 0.06) 0%, transparent 50%),
+    /* Side accents */
+    radial-gradient(ellipse 20% 40% at 5% 50%, rgba(255, 60, 30, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 20% 40% at 95% 50%, rgba(255, 60, 30, 0.05) 0%, transparent 50%);
+}
+
+.bg-vignette {
+  position: absolute;
+  inset: 0;
+  /* Soft vignette */
   background: radial-gradient(
-    ellipse at 50% 30%,
-    rgba(255, 107, 53, 0.15) 0%,
-    rgba(100, 30, 20, 0.1) 30%,
-    var(--bg-dark) 70%
+    ellipse 90% 85% at 50% 50%,
+    transparent 30%,
+    rgba(10, 10, 15, 0.6) 100%
   );
-  animation: pulse-gradient 8s ease-in-out infinite;
-}
-
-@keyframes pulse-gradient {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
-}
-
-.background-elements {
-  position: absolute;
-  inset: 0;
   pointer-events: none;
 }
 
-.grid-overlay {
+/* Audio-reactive pulse ring around center */
+.bg-pulse-ring {
   position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 107, 53, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 107, 53, 0.03) 1px, transparent 1px);
-  background-size: 30px 30px;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 85, 34, 0.3);
+  box-shadow:
+    0 0 30px rgba(255, 85, 34, 0.15),
+    inset 0 0 30px rgba(255, 85, 34, 0.1);
+  pointer-events: none;
+  transition: opacity 0.05s ease, transform 0.05s ease;
 }
 
-.noise-texture {
+/* Corner accent glows */
+.bg-corner-accent {
   position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
 }
 
-.vignette {
-  position: absolute;
-  inset: 0;
+.bg-corner-accent.top-left {
+  top: 0;
+  left: 0;
   background: radial-gradient(
-    ellipse at center,
-    transparent 50%,
-    rgba(0, 0, 0, 0.5) 100%
+    ellipse at 0% 0%,
+    rgba(255, 100, 60, 0.15) 0%,
+    rgba(255, 70, 40, 0.05) 40%,
+    transparent 70%
   );
+}
+
+.bg-corner-accent.top-right {
+  top: 0;
+  right: 0;
+  background: radial-gradient(
+    ellipse at 100% 0%,
+    rgba(255, 80, 50, 0.12) 0%,
+    rgba(255, 60, 35, 0.04) 40%,
+    transparent 70%
+  );
+}
+
+.bg-corner-accent.bottom-left {
+  bottom: 0;
+  left: 0;
+  background: radial-gradient(
+    ellipse at 0% 100%,
+    rgba(255, 70, 40, 0.1) 0%,
+    rgba(255, 50, 30, 0.03) 40%,
+    transparent 70%
+  );
+}
+
+.bg-corner-accent.bottom-right {
+  bottom: 0;
+  right: 0;
+  background: radial-gradient(
+    ellipse at 100% 100%,
+    rgba(255, 90, 55, 0.1) 0%,
+    rgba(255, 60, 35, 0.03) 40%,
+    transparent 70%
+  );
+}
+
+/* Subtle scanlines for texture */
+.bg-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
 }
 
 /* ========================================
@@ -107,25 +232,44 @@ body {
   position: relative;
   z-index: 10;
   text-align: center;
-  padding: 20px;
+  padding: 28px 20px 12px;
 }
 
 .plugin-title {
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: 12px;
-  color: var(--text);
-  text-shadow:
-    0 0 20px rgba(255, 107, 53, 0.5),
-    0 0 40px rgba(255, 107, 53, 0.3);
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 52px;
+  font-weight: 300;
+  letter-spacing: 28px;
+  margin-right: -28px;
+  text-transform: uppercase;
+  color: transparent;
+  background: linear-gradient(180deg,
+    #ffffff 0%,
+    #ffddcc 20%,
+    #ff8855 45%,
+    #ff5522 65%,
+    #cc3311 85%,
+    #882200 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: hue-rotate(var(--mode-hue)) drop-shadow(0 0 40px rgba(255, 85, 34, 0.6));
+  transition: filter 0.8s ease;
 }
 
-.plugin-subtitle {
-  display: block;
-  font-size: 10px;
-  letter-spacing: 4px;
-  color: var(--text-dim);
-  margin-top: 4px;
+.title-underline {
+  width: 140px;
+  height: 1px;
+  margin: 8px auto 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 85, 34, 0.4) 20%,
+    var(--primary) 50%,
+    rgba(255, 85, 34, 0.4) 80%,
+    transparent 100%
+  );
+  filter: hue-rotate(var(--mode-hue));
+  transition: filter 0.8s ease;
 }
 
 /* ========================================
@@ -138,29 +282,85 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 60px;
+  gap: 40px;
 }
 
 /* ========================================
-   Central Visualizer
+   Slider Columns
    ======================================== */
 
-.visualizer-container {
-  position: absolute;
-  z-index: 5;
+.slider-column {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  z-index: 10;
+}
+
+/* ========================================
+   Arc Slider
+   ======================================== */
+
+.arc-slider {
+  position: relative;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.arc-slider:active,
+.arc-slider.dragging {
+  cursor: grabbing;
+}
+
+.arc-svg {
+  overflow: visible;
+  filter: hue-rotate(var(--mode-hue));
+  transition: filter 0.8s ease;
+}
+
+.arc-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.arc-value {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 28px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.arc-label {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ========================================
+   Visualizer
+   ======================================== */
+
+.visualizer-section {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
 }
 
 .ferrofluid-container {
   position: relative;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 30% 30%,
-    rgba(40, 40, 50, 0.8) 0%,
-    rgba(20, 20, 25, 0.9) 100%
-  );
-  box-shadow:
-    inset 0 0 30px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(255, 107, 53, 0.2),
-    0 4px 20px rgba(0, 0, 0, 0.5);
+  overflow: visible;
 }
 
 .ferrofluid-canvas {
@@ -168,146 +368,253 @@ body {
 }
 
 /* ========================================
-   Knobs Orbit Layout
+   Horizontal Slider (Output)
    ======================================== */
 
-.knobs-orbit {
-  position: absolute;
-  width: 400px;
-  height: 400px;
-}
-
-.knob-position {
-  position: absolute;
-}
-
-.knob-top-left {
-  top: 20px;
-  left: 20px;
-}
-
-.knob-top-right {
-  top: 20px;
-  right: 20px;
-}
-
-.knob-bottom-left {
-  bottom: 40px;
-  left: 20px;
-}
-
-.knob-bottom-right {
-  bottom: 40px;
-  right: 20px;
-}
-
-/* ========================================
-   Output Section
-   ======================================== */
-
-.output-section {
-  position: absolute;
-  bottom: 10px;
+.plugin-footer {
+  position: relative;
+  z-index: 10;
   display: flex;
   justify-content: center;
+  padding: 16px 40px 28px;
+}
+
+.horizontal-slider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: var(--slider-width);
+  filter: hue-rotate(var(--mode-hue));
+  transition: filter 0.8s ease;
+}
+
+.horizontal-slider.dragging {
+  cursor: grabbing;
+}
+
+.horizontal-label {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  min-width: 55px;
+  text-transform: uppercase;
+}
+
+.horizontal-track-container {
+  flex: 1;
+  height: 28px;
+  position: relative;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+}
+
+.horizontal-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+.horizontal-fill {
+  position: absolute;
+  left: 0;
+  height: 3px;
+  border-radius: 2px;
+  box-shadow: 0 0 10px var(--slider-color, #aa8877);
+}
+
+.horizontal-thumb {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #151518;
+  border: 2px solid var(--slider-color, #aa8877);
+  transform: translateX(-50%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: transform 0.1s ease;
+}
+
+.horizontal-slider:hover .horizontal-thumb {
+  transform: translateX(-50%) scale(1.1);
+}
+
+.horizontal-slider.dragging .horizontal-thumb {
+  transform: translateX(-50%) scale(1.15);
+}
+
+.horizontal-thumb-inner {
+  display: none;
+}
+
+.horizontal-value {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 22px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: right;
 }
 
 /* ========================================
-   Knob Styles
+   Mode Selector
    ======================================== */
 
-.knob-container {
+.mode-selector {
+  display: flex;
+  gap: 4px;
+}
+
+.mode-button {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-}
-
-.knob {
-  position: relative;
-  cursor: grab;
-  border-radius: 50%;
-  transition: transform 0.1s ease;
-}
-
-.knob:hover {
-  transform: scale(1.02);
-}
-
-.knob.dragging {
-  cursor: grabbing;
-  transform: scale(1.05);
-}
-
-.knob-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    rgba(60, 60, 70, 0.8) 0%,
-    rgba(30, 30, 35, 0.9) 100%
-  );
-  box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.1),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
-    0 4px 15px rgba(0, 0, 0, 0.4);
-}
-
-.knob-arc {
-  position: absolute;
-  inset: 4px;
-  transform: rotate(0deg);
-}
-
-.knob-arc-track {
-  fill: none;
-  stroke: var(--knob-color, var(--primary));
-  stroke-width: 4;
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 6px var(--knob-color, var(--primary)));
-}
-
-.knob-body {
-  position: absolute;
-  inset: 12px;
-  border-radius: 50%;
-  background: linear-gradient(
-    145deg,
-    rgba(50, 50, 60, 1) 0%,
-    rgba(25, 25, 30, 1) 100%
-  );
-  box-shadow:
-    inset 0 2px 3px rgba(255, 255, 255, 0.1),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.knob-indicator {
-  width: 3px;
-  height: 40%;
-  background: var(--knob-color, var(--primary));
-  border-radius: 2px;
-  transform-origin: center bottom;
-  transform: translateY(-35%) rotate(var(--rotation, 0deg));
-  box-shadow: 0 0 8px var(--knob-color, var(--primary));
-}
-
-.knob-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 2px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(20, 20, 25, 0.6);
   color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-button:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text);
+  background: rgba(30, 30, 38, 0.8);
+}
+
+.mode-button.active {
+  background: rgba(255, 85, 34, 0.12);
+  border-color: var(--mode-color);
+  color: var(--mode-color);
+  box-shadow: 0 0 15px rgba(255, 85, 34, 0.2);
+  filter: hue-rotate(var(--mode-hue));
+  transition: filter 0.8s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.mode-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+.mode-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
 }
 
-.knob-value {
+/* ========================================
+   Small Knob (Secondary Controls)
+   ======================================== */
+
+.small-knob {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: grab;
+}
+
+.small-knob:active,
+.small-knob.dragging {
+  cursor: grabbing;
+}
+
+.small-knob-arc {
+  overflow: visible;
+  filter: hue-rotate(var(--mode-hue));
+  transition: filter 0.8s ease;
+}
+
+.small-knob-value {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 20px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.small-knob-label {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ========================================
+   Toggle Switch (Arc Style)
+   ======================================== */
+
+.toggle-arc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.toggle-arc-svg {
+  overflow: visible;
+  filter: hue-rotate(var(--mode-hue));
+  transition: filter 0.8s ease;
+}
+
+.toggle-arc-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -2px;
+}
+
+.toggle-arc-state {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
   font-size: 11px;
   font-weight: 500;
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  transition: color 0.2s ease;
+}
+
+.toggle-arc.on .toggle-arc-state {
+  color: var(--toggle-color);
+}
+
+.toggle-arc-label {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+/* ========================================
+   Bypass Title
+   ======================================== */
+
+.plugin-title.clickable {
+  cursor: pointer;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.plugin-title.clickable:hover {
+  filter: drop-shadow(0 0 50px rgba(255, 85, 34, 0.8));
+}
+
+.plugin-title.bypassed {
+  opacity: 0.3;
+  filter: grayscale(1) drop-shadow(0 0 20px rgba(255, 85, 34, 0.2));
 }
 
 /* ========================================
@@ -317,26 +624,373 @@ body {
 .plugin-footer {
   position: relative;
   z-index: 10;
-  text-align: center;
-  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  padding: 16px 40px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.brand {
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: var(--text-dim);
-  opacity: 0.5;
+.footer-group {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-divider {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.1), transparent);
 }
 
 /* ========================================
-   Animations
+   Activation Screen
    ======================================== */
 
-@keyframes glow-pulse {
+.activation-screen {
+  position: fixed;
+  inset: 0;
+  width: 900px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0e;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.activation-screen.visible {
+  opacity: 1;
+}
+
+/* Animated background */
+.activation-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.activation-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+.activation-glow.glow-1 {
+  width: 400px;
+  height: 400px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 85, 34, 0.3) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+.activation-glow.glow-2 {
+  width: 300px;
+  height: 300px;
+  top: 30%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 60, 30, 0.2) 0%, transparent 70%);
+  animation-delay: -1.3s;
+}
+
+.activation-glow.glow-3 {
+  width: 350px;
+  height: 350px;
+  top: 60%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 100, 50, 0.2) 0%, transparent 70%);
+  animation-delay: -2.6s;
+}
+
+@keyframes glowPulse {
   0%, 100% {
-    filter: drop-shadow(0 0 6px var(--primary));
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
   }
   50% {
-    filter: drop-shadow(0 0 12px var(--primary));
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
   }
+}
+
+/* Content container - fixed layout */
+.activation-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  width: 100%;
+}
+
+/* State area - FIXED height container so logo never moves */
+.activation-state-area {
+  width: 400px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+/* All state content centered in the fixed area */
+.activation-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  animation: fadeSlideUp 0.3s ease;
+}
+
+/* Logo section */
+.activation-logo {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.activation-title {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 72px;
+  font-weight: 300;
+  letter-spacing: 20px;
+  margin-right: -20px;
+  color: transparent;
+  background: linear-gradient(180deg,
+    #ffffff 0%,
+    #ffddcc 20%,
+    #ff8855 45%,
+    #ff5522 65%,
+    #cc3311 85%,
+    #882200 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 60px rgba(255, 85, 34, 0.8));
+  animation: titleGlow 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 60px rgba(255, 85, 34, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 80px rgba(255, 85, 34, 1));
+  }
+}
+
+.activation-subtitle {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 6px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 8px;
+}
+
+/* Checking/Activating spinner */
+.activation-state-content p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 1px;
+}
+
+
+.activation-spinner {
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(255, 85, 34, 0.2);
+  border-top-color: #ff5522;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.activation-prompt {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.5px;
+}
+
+.activation-input {
+  width: 320px;
+  padding: 16px 20px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 18px;
+  letter-spacing: 3px;
+  text-align: center;
+  color: #ffffff;
+  background: rgba(20, 20, 25, 0.8);
+  border: 1px solid rgba(255, 85, 34, 0.3);
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.activation-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 4px;
+}
+
+.activation-input:focus {
+  border-color: #ff5522;
+  box-shadow: 0 0 30px rgba(255, 85, 34, 0.3);
+  background: rgba(25, 25, 30, 0.9);
+}
+
+.activation-button {
+  padding: 14px 48px;
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff5522 0%, #cc3311 100%);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(255, 85, 34, 0.4);
+}
+
+.activation-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(255, 85, 34, 0.6);
+}
+
+.activation-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.activation-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.activation-button.secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 85, 34, 0.5);
+  box-shadow: none;
+}
+
+.activation-button.secondary:hover:not(:disabled) {
+  background: rgba(255, 85, 34, 0.1);
+  border-color: #ff5522;
+  box-shadow: 0 0 20px rgba(255, 85, 34, 0.2);
+}
+
+
+/* Success state */
+
+.activation-checkmark {
+  width: 80px;
+  height: 80px;
+}
+
+.activation-checkmark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.checkmark-circle {
+  stroke: #ff5522;
+  stroke-width: 2;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: checkmarkCircle 0.6s ease forwards;
+}
+
+.checkmark-check {
+  stroke: #ff5522;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkmarkCheck 0.3s ease forwards 0.4s;
+}
+
+@keyframes checkmarkCircle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes checkmarkCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.activation-success-text {
+  font-size: 24px;
+  font-weight: 300;
+  color: #ff5522;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.activation-info {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Error state */
+
+.activation-error-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 300;
+  color: #ff3333;
+  border: 2px solid #ff3333;
+  border-radius: 50%;
+}
+
+.activation-error-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+/* Version info */
+.activation-version {
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 1px;
 }
