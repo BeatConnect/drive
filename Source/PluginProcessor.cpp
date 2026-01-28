@@ -591,7 +591,8 @@ void DriveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::M
         }
     }
 
-    oversampling.processSamplesDown(juce::dsp::AudioBlock<float>(buffer));
+    juce::dsp::AudioBlock<float> outputBlock(buffer);
+    oversampling.processSamplesDown(outputBlock);
 
     // Makeup gain (compensate for saturation level changes)
     const float satMakeup = 1.0f / (1.0f + driveNorm * 0.8f);
